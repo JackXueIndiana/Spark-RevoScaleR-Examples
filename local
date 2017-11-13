@@ -1,0 +1,49 @@
+# Set a local compute context
+rxSetComputeContext("local")
+
+# Set the HDFS (WASB) location of example data.
+bigDataDirRoot <- "/tmp/nyc"
+
+# Set directory in bigDataDirRoot to load the data.
+inputFile <- file.path(bigDataDirRoot,"yellow_tripdata_2016-01.csv")
+
+# Define the HDFS (WASB) file system.
+hdfsFS <- RxHdfsFileSystem()
+
+# Define coumn classes
+taxiColClasses <- c(VendorID = "character",
+                    tpep_pickup_datetime = "character",
+                    tpep_dropoff_datetime = "character",
+                    passenger_count = "character",
+                    trip_distance = "float32",
+                    pickup_longitude = "character",
+                    pickup_latitude = "character",
+                    RatecodeID = "character",
+                    store_and_fwd_flag = "character",
+                    dropoff_longitude = "character",
+                    dropoff_latitude = "character",
+                    payment_type = "float32",
+                    fare_amount = "character",
+                    extra = "character",
+                    mta_tax = "character",
+                    tip_amount = "character",
+                    tolls_amount = "character",
+                    improvement_surcharge = "character",
+                    total_amount = "float32");
+
+# Define the text data source in HDFS.
+taxiDS <- RxTextData(file = inputFile, colClasses  = taxiColClasses,
+                                      fileSystem = hdfsFS, delimiter = ",", firstRowIsColNames = TRUE);
+
+rxGetInfo(taxiDS, getVarInfo = TRUE, numRows=10)
+
+# formula to use
+formula = "total_amount ~ trip_distance + payment_type"
+
+# Run a logistic regression
+system.time(
+  model <- rxGlm(formula, family=gaussian(), dropFirst = TRUE, data = taxiDS)
+)
+
+# Display a summary
+summary(model)
