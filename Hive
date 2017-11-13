@@ -1,0 +1,13 @@
+#Create a Spark compute context:
+myHadoopCluster <- rxSparkConnect(reset = TRUE)
+
+#Retrieve some sample data from Hive and run a model:
+hiveData <- RxHiveData("select * from hivesampletable",
+                       colInfo = list(devicemake = list(type = "factor")))
+rxGetInfo(hiveData, getVarInfo = TRUE, numRows=10)
+
+#Create a linear model
+model <- rxLinMod(querydwelltime ~ devicemake, data=hiveData)
+
+#Show the model
+summary(model)
