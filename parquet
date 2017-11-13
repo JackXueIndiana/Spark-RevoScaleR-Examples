@@ -1,0 +1,23 @@
+#Create a Spark compute context:
+myHadoopCluster <- rxSparkConnect(reset = TRUE)
+
+#Retrieve some sample data from Parquet and run a model:
+rxHadoopMakeDir('/share')
+rxHadoopCopyFromLocal(file.path(rxGetOption('sampleDataDir'), 'claimsParquet/'), '/share/')
+pqData <- RxParquetData('/share/claimsParquet',
+                        colInfo = list(
+                          age    = list(type = "factor"),
+                          car.age = list(type = "factor"),
+                          type = list(type = "factor")
+                        ) )
+rxGetInfo(pqData, getVarInfo = TRUE, numRows=10)
+
+model <- rxNaiveBayes(type ~ age + cost, data = pqData)
+summary(model)
+
+#Check on Spark data objects, cleanup, and close the Spark session:
+lsObj <- rxSparkListData() # two data objs are cached
+lsObj
+rxSparkRemoveData(lsObj)
+rxSparkListData() # it should show empty list
+rxSparkDisconnect(myHadoopCluster)
