@@ -51,5 +51,5 @@ myHadoopCluster <- rxSparkConnect(reset=TRUE,numExecutors=12,executorCores=6,exe
 Time: user system elapsed 1.832 1.184 83.746
 Comments: The required 12x6x2=144GB is beyond what we have.
 
-Finally, we show an example to deal with Hive table and parquet files.
+Finally, we show examples on how to retrieve data from Hive (table hivesampletable) and parquet files (in /share/claimsParquet) and utlize the data to build models.
 
